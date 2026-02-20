@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+.cursor-move {
+    touch-action: none;
+}

@@ -1,0 +1,17 @@
+{
+    "time": "600",
+    "timers": [
+        {
+            "color": "red-700",
+            "remaining": 600
+        },
+        {
+            "color": "lime-600",
+            "remaining": 550
+        },
+        {
+            "color": "sky-500",
+            "remaining": 300
+        }
+    ]
+}
