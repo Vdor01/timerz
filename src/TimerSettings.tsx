@@ -92,12 +92,12 @@ const TimerSettings = ({
             </summary>
             <div className="flex flex-row gap-4 text-sm collapse-content items-between">
                 <div className="flex flex-col flex-1 gap-2 px-4 pt-4">
-                    <div className="flex flex-wrap justify-between gap-1">
+                    <div className="grid grid-cols-3 min-[340px]:grid-cols-4 min-[480px]:grid-cols-6 gap-1">
                         {COLORS.map((color) => (
                             <button
                                 key={color}
                                 onClick={() => handleColorChange(color)}
-                                className={`w-10 h-10 rounded ${getColorClass(`${color}-${selectedShade}`)} ${
+                                className={`w-full aspect-square rounded ${getColorClass(`${color}-${selectedShade}`)} ${
                                     selectedColor === color
                                         ? "ring-2 ring-offset-2 ring-base-content"
                                         : ""
@@ -106,21 +106,15 @@ const TimerSettings = ({
                             />
                         ))}
                     </div>
-                    <div className="flex flex-wrap justify-between">
-                        {SHADES.map((shade) => (
-                            <button
-                                key={shade}
-                                onClick={() => handleShadeChange(shade)}
-                                className={`btn btn-xs ${
-                                    selectedShade === shade
-                                        ? "btn-primary"
-                                        : "btn-ghost"
-                                }`}
-                            >
-                                {shade}
-                            </button>
-                        ))}
-                    </div>
+                    <input
+                        type="range"
+                        min={SHADES[0]}
+                        max={SHADES[SHADES.length - 1]}
+                        step={100}
+                        value={parseInt(selectedShade)}
+                        onChange={(e) => handleShadeChange(e.target.value)}
+                        className="w-full range range-xs bg-linear-to-r from-slate-300 to-slate-900"
+                    />
                 </div>
                 <div className="flex flex-col justify-center px-2">
                     <button
