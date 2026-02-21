@@ -132,3 +132,54 @@ export function PlusSVG({ color = "#fff" }: { color?: string }) {
         </svg>
     )
 }
+
+/**
+ * Beállítás ikon SVG komponens.
+ *
+ * @param color - Az ikon kitöltési színe (alapértelmezett: "#fff").
+ * @param className - Opcionális CSS osztálynev.
+ * @returns JSX.Element - A beállítás ikon SVG.
+ */
+export function SettingsSVG({
+    color = "#fff",
+    className = "",
+}: {
+    color?: string
+    className?: string
+}) {
+    return (
+        <svg
+            className={className}
+            fill="none"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <path
+                d="M18.94 5.421l-5.17-2.99c-.99-.57-2.54-.57-3.53 0l-5.22 3.01c-2.07 1.4-2.19 1.61-2.19 3.84v5.43c0 2.23.12 2.45 2.23 3.87l5.17 2.99c.5.29 1.14.43 1.77.43.63 0 1.27-.14 1.76-.43l5.22-3.01c2.07-1.4 2.19-1.61 2.19-3.84v-5.44c0-2.23-.12-2.44-2.23-3.86zM12 15.251c-1.79 0-3.25-1.46-3.25-3.25s1.46-3.25 3.25-3.25 3.25 1.46 3.25 3.25-1.46 3.25-3.25 3.25z"
+                fill={color}
+            />
+        </svg>
+    )
+}
+
+/**
+ * Kilépés ikon SVG komponens.
+ *
+ * @param color - Az ikon kitöltési színe (alapértelmezett: "#fff").
+ * @param className - Opcionális CSS osztálynev.
+ * @returns JSX.Element - A kilépés ikon SVG.
+ */
+export function ExitSVG({ color = "#fff", className = "" }) {
+    return (
+        <svg
+            className={className}
+            viewBox="0 0 1024 1024"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <path
+                d="M195.2 195.2a64 64 0 0190.496 0L512 421.504 738.304 195.2a64 64 0 0190.496 90.496L602.496 512 828.8 738.304a64 64 0 01-90.496 90.496L512 602.496 285.696 828.8a64 64 0 01-90.496-90.496L421.504 512 195.2 285.696a64 64 0 010-90.496z"
+                fill={color}
+            />
+        </svg>
+    )
+}

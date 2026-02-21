@@ -91,12 +91,38 @@ const Timers = ({ isSettings }: TimersProps) => {
     const [globalTime, setGlobalTime] = useState(
         () => loadFromStorage().globalTime,
     )
+    const [isRunning, setIsRunning] = useState<boolean[]>(() =>
+        new Array(loadFromStorage().timers.length).fill(false),
+    )
     const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor))
 
     // Save to localStorage whenever timers or globalTime changes
     useEffect(() => {
         saveToStorage({ globalTime, timers })
     }, [timers, globalTime])
+
+    // Central countdown interval — runs regardless of active view
+    useEffect(() => {
+        const interval = window.setInterval(() => {
+            setTimers((prevTimers) => {
+                const newTimers = prevTimers.map((timer, index) => {
+                    if (isRunning[index] && timer.remaining > 0) {
+                        const newRemaining = timer.remaining - 1
+                        if (newRemaining === 0) {
+                            navigator.vibrate?.([200, 100, 200])
+                            setIsRunning((prev) =>
+                                prev.map((r, i) => (i === index ? false : r)),
+                            )
+                        }
+                        return { ...timer, remaining: newRemaining }
+                    }
+                    return timer
+                })
+                return newTimers
+            })
+        }, 1000)
+        return () => clearInterval(interval)
+    }, [isRunning])
 
     /**
      * Kezeli a drag-and-drop esemény végét, és frissíti az időzítők sorrendjét.
@@ -114,6 +140,29 @@ const Timers = ({ isSettings }: TimersProps) => {
                 return arrayMove(items, oldIndex, newIndex)
             })
         }
+    }
+
+    /**
+     * Váltja az adott időzítő futó/szüneteltetett állapotát.
+     *
+     * @param id - Az időzítő indexe.
+     */
+    const handlePlayPause = (id: number) => {
+        setIsRunning((prev) => prev.map((r, i) => (i === id ? !r : r)))
+    }
+
+    /**
+     * Leállítja az adott időzítőt és visszaállítja az időt a globális értékre.
+     *
+     * @param id - Az időzítő indexe.
+     */
+    const handleStop = (id: number) => {
+        setIsRunning((prev) => prev.map((r, i) => (i === id ? false : r)))
+        setTimers((prevTimers) =>
+            prevTimers.map((timer, index) =>
+                index === id ? { ...timer, remaining: globalTime } : timer,
+            ),
+        )
     }
 
     /**
@@ -140,20 +189,7 @@ const Timers = ({ isSettings }: TimersProps) => {
         setTimers((prevTimers) =>
             prevTimers.map((timer) => ({ ...timer, remaining: time })),
         )
-    }
-
-    /**
-     * Frissíti egy adott időzítő hátralévő idejét a state-ben.
-     *
-     * @param id - A frissítendő időzítő indexe.
-     * @param remaining - Az új hátralévő idő másodpercben.
-     */
-    const handleUpdate = (id: number, remaining: number) => {
-        setTimers((prevTimers) =>
-            prevTimers.map((timer, index) =>
-                index === id ? { ...timer, remaining } : timer,
-            ),
-        )
+        setIsRunning((prev) => prev.map(() => false))
     }
 
     /**
@@ -165,6 +201,7 @@ const Timers = ({ isSettings }: TimersProps) => {
             remaining: globalTime,
         }
         setTimers((prevTimers) => [...prevTimers, newTimer])
+        setIsRunning((prev) => [...prev, false])
     }
 
     /**
@@ -174,6 +211,7 @@ const Timers = ({ isSettings }: TimersProps) => {
      */
     const handleDeleteTimer = (id: number) => {
         setTimers((prevTimers) => prevTimers.filter((_, index) => index !== id))
+        setIsRunning((prev) => prev.filter((_, i) => i !== id))
     }
 
     if (isSettings) {
@@ -264,8 +302,9 @@ const Timers = ({ isSettings }: TimersProps) => {
                     key={index}
                     id={index}
                     timer={timer}
-                    globalTime={globalTime}
-                    onUpdate={handleUpdate}
+                    isRunning={isRunning[index] ?? false}
+                    onPlayPause={handlePlayPause}
+                    onStop={handleStop}
                 />
             ))}
         </div>

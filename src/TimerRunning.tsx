@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react"
 import { PauseSVG, PlaySVG, StopSVG } from "./assets/SVGs"
 import { getColorClass } from "./colorUtils"
 
@@ -10,8 +9,9 @@ interface TimerData {
 interface TimerRunningProps {
     id: number
     timer: TimerData
-    globalTime: number
-    onUpdate: (id: number, remaining: number) => void
+    isRunning: boolean
+    onPlayPause: (id: number) => void
+    onStop: (id: number) => void
 }
 
 /**
@@ -27,47 +27,10 @@ interface TimerRunningProps {
 const TimerRunning = ({
     id,
     timer,
-    globalTime,
-    onUpdate,
+    isRunning,
+    onPlayPause,
+    onStop,
 }: TimerRunningProps) => {
-    const [isRunning, setIsRunning] = useState(false)
-    const [remaining, setRemaining] = useState(timer.remaining)
-
-    useEffect(() => {
-        setRemaining(timer.remaining)
-    }, [timer.remaining])
-
-    useEffect(() => {
-        let interval: number | undefined
-
-        if (isRunning && remaining > 0) {
-            interval = window.setInterval(() => {
-                setRemaining((prev) => Math.max(0, prev - 1))
-            }, 1000)
-        } else if (remaining === 0) {
-            setIsRunning(false)
-        }
-
-        return () => {
-            if (interval) clearInterval(interval)
-        }
-    }, [isRunning, remaining])
-
-    // Separate effect to update parent component
-    useEffect(() => {
-        if (remaining !== timer.remaining) {
-            onUpdate(id, remaining)
-        }
-    }, [remaining, id, onUpdate, timer.remaining])
-
-    // Vibration when timer expires
-    useEffect(() => {
-        if (remaining === 0 && timer.remaining > 0) {
-            // Vibrate pattern: vibrate for 200ms, pause 100ms, vibrate 200ms
-            navigator.vibrate?.([200, 100, 200])
-        }
-    }, [remaining, timer.remaining])
-
     /**
      * Másodperceket MM:SS formátumú karakterlánccá alakítja.
      *
@@ -80,26 +43,11 @@ const TimerRunning = ({
         return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
     }
 
-    /**
-     * Váltja az időzítő futó/szüneteltetett állapotát.
-     */
-    const handlePlayPause = () => {
-        setIsRunning(!isRunning)
-    }
-
-    /**
-     * Leállítja az időzítőt és visszaellítja az időt az alapértelmezett értékre.
-     */
-    const handleStop = () => {
-        setIsRunning(false)
-        setRemaining(globalTime)
-    }
-
     return (
         <div className="relative flex justify-between overflow-hidden rounded-lg shadow-md bg-base-200">
             {/* Animated color overlay */}
             <div
-                className={`absolute inset-0 ${getColorClass(timer.color)} rounded-lg transition-transform duration-500 ${remaining === 0 ? "translate-x-0" : "-translate-x-full"}`}
+                className={`absolute inset-0 ${getColorClass(timer.color)} rounded-lg transition-transform duration-500 ${timer.remaining === 0 ? "translate-x-0" : "-translate-x-full"}`}
             ></div>
 
             {/* Content */}
@@ -109,7 +57,7 @@ const TimerRunning = ({
                 ></div>
                 <div className="flex items-center flex-1 p-4">
                     <span className="font-mono text-2xl font-bold">
-                        {formatTime(remaining)}
+                        {formatTime(timer.remaining)}
                     </span>
                 </div>
                 <div className="flex flex-row items-center h-auto gap-4 pr-4">
@@ -117,14 +65,14 @@ const TimerRunning = ({
                         <input
                             type="checkbox"
                             checked={isRunning}
-                            onChange={handlePlayPause}
+                            onChange={() => onPlayPause(id)}
                         />
                         <PlaySVG className="w-full h-full swap-off" />
                         <PauseSVG className="w-full h-full swap-on" />
                     </label>
                     <button
                         className="btn btn-square btn-sm"
-                        onClick={handleStop}
+                        onClick={() => onStop(id)}
                     >
                         <StopSVG />
                     </button>
